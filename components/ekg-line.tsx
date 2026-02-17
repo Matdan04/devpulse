@@ -10,8 +10,30 @@ export default function EkgLine() {
         viewBox="0 0 900 80"
         preserveAspectRatio="none"
       >
+        <defs>
+          <linearGradient id="ekgPulse" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="transparent" />
+            <stop offset="40%" stopColor="var(--green)" stopOpacity="0.15" />
+            <stop offset="95%" stopColor="var(--green)" stopOpacity="1" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="1" />
+            <animate
+              attributeName="x1"
+              from="-300"
+              to="900"
+              dur="2.5s"
+              repeatCount="indefinite"
+            />
+            <animate
+              attributeName="x2"
+              from="0"
+              to="1200"
+              dur="2.5s"
+              repeatCount="indefinite"
+            />
+          </linearGradient>
+        </defs>
         <path className="ekg-line-bg" d={EKG_PATH} />
-        <path className="ekg-line" d={EKG_PATH} />
+        <path className="ekg-line-pulse" d={EKG_PATH} />
       </svg>
     </div>
   );
