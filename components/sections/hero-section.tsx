@@ -17,16 +17,16 @@ export default function HeroSection() {
       </h1>
       <p>
         DevPulse monitors behavioral signals from your Git repos and issue
-        trackers to surface burnout risk early — not emotionally, but
+        trackers to surface burnout risk early not emotionally, but
         objectively.
       </p>
       <div className="hero-buttons">
         <Button asChild className="btn-primary">
           <a href="#">Get Started Free</a>
         </Button>
-        <Button asChild variant="outline" className="btn-secondary">
+        {/* <Button asChild variant="outline" className="btn-secondary">
           <a href="#">View on GitHub →</a>
-        </Button>
+        </Button> */}
       </div>
 
       <EkgLine />

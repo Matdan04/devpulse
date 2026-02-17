@@ -3,7 +3,7 @@ const signals = [
     icon: "🌙",
     title: "Late-Night Commits",
     description:
-      "Tracks commits after 10pm in the developer\u2019s local timezone. Occasional late nights are normal \u2014 sustained patterns aren\u2019t.",
+      "Tracks commits after 10pm in the developer\u2019s local timezone. Occasional late nights are normal but sustained patterns aren\u2019t.",
   },
   {
     icon: "📅",
@@ -15,7 +15,7 @@ const signals = [
     icon: "👀",
     title: "PR Review Drop",
     description:
-      "A sudden decline in code review participation often signals overwhelm or disengagement \u2014 both early burnout indicators.",
+      "A sudden decline in code review participation often signals overwhelm or disengagement both early burnout indicators.",
   },
   {
     icon: "📊",
@@ -33,7 +33,7 @@ const signals = [
     icon: "🔀",
     title: "Pattern Disruption",
     description:
-      "Irregularity in working hours \u2014 wide variance in start/end times suggests disrupted routines and poor recovery.",
+      "Irregularity in working hours, wide variance in start/end times suggests disrupted routines and poor recovery.",
   },
 ];
 
@@ -43,7 +43,7 @@ export default function SignalsSection() {
       <div className="section-label">Behavioral Signals</div>
       <h2 className="section-title">Six signals. Zero surveillance.</h2>
       <p className="section-desc">
-        DevPulse tracks work patterns — not keystrokes, not screen time, not
+        DevPulse tracks work patterns not keystrokes, not screen time, not
         code quality. Just the behavioral signals that research shows correlate
         with burnout.
       </p>

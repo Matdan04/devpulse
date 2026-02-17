@@ -351,11 +351,36 @@ nav {
   fill: none;
 }
 
-.ekg-line-pulse {
-  stroke: url(#ekgPulse);
+.ekg-line {
+  stroke: var(--green);
   stroke-width: 2;
   fill: none;
   filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: drawEKG 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes drawEKG {
+  0% {
+    stroke-dashoffset: 1200;
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  60% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
 }
 
 /* Dashboard Preview */

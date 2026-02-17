@@ -10,9 +10,9 @@ export default function CtaSection() {
         <Button asChild className="btn-primary">
           <a href="#">Get Started Free</a>
         </Button>
-        <Button asChild variant="outline" className="btn-secondary">
+        {/* <Button asChild variant="outline" className="btn-secondary">
           <a href="#">Star on GitHub ⭐</a>
-        </Button>
+        </Button> */}
       </div>
     </section>
   );

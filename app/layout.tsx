@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "DevPulse — Developer Health & Burnout Radar",
   description:
-    "DevPulse monitors behavioral signals from your Git repos and issue trackers to surface burnout risk early — not emotionally, but objectively.",
+    "DevPulse monitors behavioral signals from your Git repos and issue trackers to surface burnout risk early not emotionally, but objectively.",
 };
 
 export default function RootLayout({
