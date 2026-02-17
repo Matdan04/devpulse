@@ -21,9 +21,14 @@ export default function Navbar() {
           <a href="#privacy">Privacy</a>
         </li>
         <li>
+          <div className="flex gap-2">
           <Button asChild className="btn-primary">
-            <a href="#">Get Early Access</a>
+            <a href="#">Login</a>
           </Button>
+            <Button asChild className="btn-primary">
+              <a href="#">Signup</a>
+            </Button>
+          </div>
         </li>
       </ul>
     </nav>
