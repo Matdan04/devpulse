@@ -51,11 +51,8 @@ export default async function DashboardPage() {
       {/* Site Header */}
       <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-(--dp-border) bg-background px-4">
         <SidebarTrigger className="-ml-1 text-(--text-muted) hover:text-foreground hover:bg-white/5" />
-        {isOwnerOrAdmin && spotsLeft > 0 && (
-          <div className="ml-auto">
-            <InviteButton />
-          </div>
-        )}
+        <div className="flex-1" />
+        {isOwnerOrAdmin && spotsLeft > 0 && <InviteButton />}
       </header>
 
       {/* Page Content */}

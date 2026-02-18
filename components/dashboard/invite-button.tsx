@@ -3,8 +3,15 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
-import { UserPlus, Copy, Check, X } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { UserPlus, Copy, Check, Link2 } from "lucide-react"
 
 export function InviteButton() {
   const [open, setOpen] = useState(false)
@@ -43,12 +50,14 @@ export function InviteButton() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  function reset() {
-    setOpen(false)
-    setEmail("")
-    setError(null)
-    setInviteUrl(null)
-    setCopied(false)
+  function handleOpenChange(value: boolean) {
+    if (!value) {
+      setEmail("")
+      setError(null)
+      setInviteUrl(null)
+      setCopied(false)
+    }
+    setOpen(value)
   }
 
   return (
@@ -58,75 +67,92 @@ export function InviteButton() {
         Invite member
       </Button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-(--bg-card) border border-(--dp-border) rounded-xl p-6 w-full max-w-md shadow-2xl">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-foreground">Invite a team member</h2>
-              <button
-                onClick={reset}
-                className="text-(--text-muted) hover:text-foreground transition-colors"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="bg-(--bg-card) border-(--dp-border) sm:max-w-[480px] overflow-hidden p-8 gap-6">
+          <DialogHeader className="flex flex-col gap-2">
+            <DialogTitle className="text-lg font-semibold">
+              Invite a team member
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              Add a teammate to your DevPulse workspace.
+            </DialogDescription>
+          </DialogHeader>
 
-            {!inviteUrl ? (
-              <form onSubmit={handleInvite} className="flex flex-col gap-4">
-                <Field>
-                  <FieldLabel htmlFor="invite-email">Email address (optional)</FieldLabel>
-                  <Input
-                    id="invite-email"
-                    type="email"
-                    placeholder="teammate@acme.dev"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <FieldDescription>
-                    Leave blank to generate a shareable link without pre-filling an email.
-                  </FieldDescription>
-                </Field>
-
-                {error && <FieldError>{error}</FieldError>}
-
-                <div className="flex gap-3 mt-2">
-                  <Button type="submit" disabled={loading} className="flex-1">
-                    {loading ? "Generating…" : email ? "Send invitation" : "Generate link"}
-                  </Button>
-                  <Button type="button" variant="outline" onClick={reset}>
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <div className="flex flex-col gap-4">
-                <p className="text-sm text-(--text-secondary)">
-                  {email
-                    ? `An invitation email has been sent to ${email}. Share the link below as a backup.`
-                    : "Share this link with your teammate. It expires in 7 days."}
+          {!inviteUrl ? (
+            <form onSubmit={handleInvite} className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="invite-email" className="text-sm font-medium">
+                  Email address{" "}
+                  <span className="text-xs font-normal text-muted-foreground">(optional)</span>
+                </Label>
+                <Input
+                  id="invite-email"
+                  type="email"
+                  placeholder="teammate@acme.dev"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-10"
+                />
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Leave blank to generate a shareable link.
                 </p>
+              </div>
 
-                <div className="flex items-center gap-2 p-3 bg-(--bg-secondary) rounded-lg border border-(--dp-border)">
-                  <p className="flex-1 text-xs text-(--text-secondary) truncate font-mono">
-                    {inviteUrl}
-                  </p>
-                  <Button size="icon-sm" variant="ghost" onClick={copyLink}>
-                    {copied ? (
-                      <Check className="size-3.5 text-(--green)" />
-                    ) : (
-                      <Copy className="size-3.5" />
-                    )}
-                  </Button>
-                </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
 
-                <Button variant="outline" onClick={reset}>
-                  Done
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-10 bg-(--green) text-white hover:opacity-90"
+              >
+                {loading ? "Generating…" : email ? "Send invitation" : "Generate link"}
+              </Button>
+            </form>
+          ) : (
+            <div className="flex flex-col gap-6 min-w-0 overflow-hidden">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {email ? (
+                  <>
+                    Invitation sent to{" "}
+                    <span className="font-medium text-foreground">{email}</span>.{" "}
+                    Share the link below as a backup.
+                  </>
+                ) : (
+                  "Share this link with your teammate. It expires in 7 days."
+                )}
+              </p>
+
+              <div className="flex items-center gap-3 rounded-lg border border-(--dp-border) bg-(--bg-secondary) px-4 py-3 min-w-0 overflow-hidden">
+                <Link2 className="size-4 shrink-0 text-muted-foreground" />
+                <span className="min-w-0 flex-1 truncate font-mono text-xs select-all">
+                  {inviteUrl}
+                </span>
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={copyLink}
+                  className="shrink-0"
+                >
+                  {copied ? (
+                    <Check className="size-3.5 text-(--green)" />
+                  ) : (
+                    <Copy className="size-3.5" />
+                  )}
                 </Button>
               </div>
-            )}
-          </div>
-        </div>
-      )}
+
+              <Button
+                variant="outline"
+                className="w-full h-10"
+                onClick={() => handleOpenChange(false)}
+              >
+                Done
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
