@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Field, FieldDescription, FieldError, FieldGroup } from "@/components/ui/field"
 import { UserPlus, Copy, Check, Link2 } from "lucide-react"
 
 export function InviteButton() {
@@ -68,45 +71,49 @@ export function InviteButton() {
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="bg-(--bg-card) border-(--dp-border) sm:max-w-[480px] overflow-hidden p-8 gap-6">
-          <DialogHeader className="flex flex-col gap-2">
-            <DialogTitle className="text-lg font-semibold">
+        <DialogContent >
+          <DialogHeader >
+            <DialogTitle>
               Invite a team member
             </DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed">
+            <DialogDescription>
               Add a teammate to your DevPulse workspace.
             </DialogDescription>
           </DialogHeader>
 
           {!inviteUrl ? (
-            <form onSubmit={handleInvite} className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="invite-email" className="text-sm font-medium">
-                  Email address{" "}
-                  <span className="text-xs font-normal text-muted-foreground">(optional)</span>
-                </Label>
-                <Input
-                  id="invite-email"
-                  type="email"
-                  placeholder="teammate@acme.dev"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-10"
-                />
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Leave blank to generate a shareable link.
-                </p>
-              </div>
-
-              {error && <p className="text-sm text-destructive">{error}</p>}
-
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-10 bg-(--green) text-white hover:opacity-90"
-              >
-                {loading ? "Generating…" : email ? "Send invitation" : "Generate link"}
-              </Button>
+            <form onSubmit={handleInvite}>
+              <FieldGroup>
+                <Field>
+                  <Label htmlFor="invite-email">
+                    Email address{" "}
+                    <span className="text-xs font-normal text-muted-foreground">(optional)</span>
+                  </Label>
+                  <Input
+                    id="invite-email"
+                    type="email"
+                    placeholder="teammate@acme.dev"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <FieldDescription>
+                    Leave blank to generate a shareable link.
+                  </FieldDescription>
+                  {error && <FieldError>{error}</FieldError>}
+                </Field>
+              </FieldGroup>
+              <DialogFooter className="mt-6">
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-(--green) text-white hover:opacity-90"
+                >
+                  {loading ? "Generating…" : email ? "Send invitation" : "Generate link"}
+                </Button>
+              </DialogFooter>
             </form>
           ) : (
             <div className="flex flex-col gap-6 min-w-0 overflow-hidden">
