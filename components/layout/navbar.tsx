@@ -23,7 +23,7 @@ export default function Navbar() {
         <li>
           <div className="flex gap-2">
           <Button asChild className="btn-primary">
-            <a href="#">Login</a>
+            <a href="/login">Login</a>
           </Button>
             <Button asChild className="btn-primary">
               <a href="#">Signup</a>
