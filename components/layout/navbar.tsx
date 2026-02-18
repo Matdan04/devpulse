@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   return (
-    <nav>
+    <nav className="landing-nav">
       <div className="logo">
         <div className="logo-icon">
           <div className="pulse-ring" />

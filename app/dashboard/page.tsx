@@ -2,7 +2,19 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { InviteButton } from "@/components/dashboard/invite-button"
-import { Users, Activity, AlertTriangle } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Users, Activity, AlertTriangle, GitBranch } from "lucide-react"
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -15,6 +27,7 @@ export default async function DashboardPage() {
         include: {
           members: {
             include: { user: true },
+            orderBy: { joinedAt: "asc" },
           },
         },
       },
@@ -24,7 +37,7 @@ export default async function DashboardPage() {
   if (!membership) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <p className="text-[var(--text-secondary)]">You are not part of any team yet.</p>
+        <p className="text-(--text-secondary)">You are not part of any team yet.</p>
       </div>
     )
   }
@@ -34,149 +47,206 @@ export default async function DashboardPage() {
   const spotsLeft = 10 - team.members.length
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+    <>
+      {/* Site Header */}
+      <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-(--dp-border) bg-background px-4">
+        <SidebarTrigger className="-ml-1 text-(--text-muted) hover:text-foreground hover:bg-white/5" />
+        {isOwnerOrAdmin && spotsLeft > 0 && (
+          <div className="ml-auto">
+            <InviteButton />
+          </div>
+        )}
+      </header>
+
+      {/* Page Content */}
+      <div className="flex flex-col gap-6 p-6">
+
+        {/* Page intro */}
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{team.name}</h1>
-          <p className="text-[var(--text-secondary)] text-sm mt-1">
-            Team overview · {team.members.length}/10 members
+          <h1 className="text-xl font-bold text-foreground">{team.name}</h1>
+          <p className="text-sm text-(--text-secondary) mt-0.5">
+            {team.members.length} of 10 members ·{" "}
+            {spotsLeft > 0
+              ? `${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} remaining`
+              : "Team is at capacity"}
           </p>
         </div>
-        {isOwnerOrAdmin && spotsLeft > 0 && <InviteButton />}
-      </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <StatCard
-          icon={<Users className="size-5 text-[var(--dp-accent)]" />}
-          label="Total members"
-          value={`${team.members.length} / 10`}
-        />
-        <StatCard
-          icon={<Activity className="size-5 text-[var(--green)]" />}
-          label="Integrations"
-          value="0 connected"
-        />
-        <StatCard
-          icon={<AlertTriangle className="size-5 text-[var(--yellow)]" />}
-          label="Active alerts"
-          value="None yet"
-        />
-      </div>
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard
+            icon={<Users className="size-4 text-(--dp-accent)" />}
+            iconBg="bg-(--accent-glow)"
+            label="Team members"
+            value={`${team.members.length} / 10`}
+          />
+          <StatCard
+            icon={<GitBranch className="size-4 text-(--green)" />}
+            iconBg="bg-(--green-glow)"
+            label="Integrations"
+            value="0 connected"
+          />
+          <StatCard
+            icon={<AlertTriangle className="size-4 text-(--yellow)" />}
+            iconBg="bg-(--yellow-glow)"
+            label="Active alerts"
+            value="None yet"
+          />
+        </div>
 
-      {/* Members table */}
-      <section>
-        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
-          Team members
-        </h2>
-        <div className="rounded-lg border border-[var(--dp-border)] overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-[var(--bg-secondary)]">
-              <tr>
-                <th className="text-left px-4 py-3 text-[var(--text-muted)] font-medium">Member</th>
-                <th className="text-left px-4 py-3 text-[var(--text-muted)] font-medium">Role</th>
-                <th className="text-left px-4 py-3 text-[var(--text-muted)] font-medium">Joined</th>
-                <th className="text-left px-4 py-3 text-[var(--text-muted)] font-medium">
-                  Risk score
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--dp-border)]">
-              {team.members.map((m) => (
-                <tr key={m.id} className="bg-[var(--bg-card)] hover:bg-white/[0.02] transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {m.user.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={m.user.image}
-                          alt={m.user.name ?? ""}
-                          className="size-7 rounded-full"
-                        />
-                      ) : (
-                        <div className="size-7 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-xs font-bold text-[var(--text-primary)]">
-                          {(m.user.name ?? "?").charAt(0).toUpperCase()}
+        {/* Members Table */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-(--text-muted) uppercase tracking-wider">
+              Team members
+            </h2>
+            {spotsLeft === 0 && (
+              <span className="text-xs text-(--yellow) font-medium">
+                At capacity (10/10)
+              </span>
+            )}
+          </div>
+
+          <Card className="border-(--dp-border) bg-(--bg-card) rounded-xl overflow-hidden p-0 gap-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-(--dp-border) hover:bg-transparent">
+                  <TableHead className="h-10 px-5 bg-(--bg-secondary) text-(--text-muted) font-medium text-xs uppercase tracking-wide">
+                    Member
+                  </TableHead>
+                  <TableHead className="h-10 px-5 bg-(--bg-secondary) text-(--text-muted) font-medium text-xs uppercase tracking-wide">
+                    Role
+                  </TableHead>
+                  <TableHead className="h-10 px-5 bg-(--bg-secondary) text-(--text-muted) font-medium text-xs uppercase tracking-wide">
+                    Joined
+                  </TableHead>
+                  <TableHead className="h-10 px-5 bg-(--bg-secondary) text-(--text-muted) font-medium text-xs uppercase tracking-wide">
+                    Risk score
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {team.members.map((m) => (
+                  <TableRow
+                    key={m.id}
+                    className="border-(--dp-border) hover:bg-white/2 transition-colors"
+                  >
+                    <TableCell className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <Avatar size="sm">
+                          {m.user.image && (
+                            <AvatarImage src={m.user.image} alt={m.user.name ?? ""} />
+                          )}
+                          <AvatarFallback className="bg-(--bg-secondary) text-foreground text-xs font-bold">
+                            {(m.user.name ?? "?").charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-foreground text-sm leading-tight">
+                            {m.user.name ?? "Unnamed"}
+                          </p>
+                          <p className="text-xs text-(--text-muted) mt-0.5">
+                            {m.user.email}
+                          </p>
                         </div>
-                      )}
-                      <div>
-                        <p className="font-medium text-[var(--text-primary)]">
-                          {m.user.name ?? "Unnamed"}
-                        </p>
-                        <p className="text-xs text-[var(--text-muted)]">{m.user.email}</p>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        m.role === "owner"
-                          ? "bg-[var(--accent-glow)] text-[var(--dp-accent)]"
-                          : m.role === "admin"
-                            ? "bg-[var(--green-glow)] text-[var(--green)]"
-                            : "bg-white/5 text-[var(--text-secondary)]"
-                      }`}
-                    >
-                      {m.role}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">
-                    {new Date(m.joinedAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-muted)] text-xs italic">
-                    No data yet
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </TableCell>
+                    <TableCell className="px-5 py-3.5">
+                      <RoleBadge role={m.role} />
+                    </TableCell>
+                    <TableCell className="px-5 py-3.5 text-sm text-(--text-secondary)">
+                      {new Date(m.joinedAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </TableCell>
+                    <TableCell className="px-5 py-3.5">
+                      <span className="text-xs text-(--text-muted) italic">
+                        No data yet
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+
+          {spotsLeft > 0 && isOwnerOrAdmin && (
+            <p className="text-xs text-(--text-muted)">
+              {spotsLeft} spot{spotsLeft !== 1 ? "s" : ""} remaining · invite members to fill them.
+            </p>
+          )}
         </div>
 
-        {spotsLeft > 0 && isOwnerOrAdmin && (
-          <p className="text-xs text-[var(--text-muted)] mt-3">
-            {spotsLeft} spot{spotsLeft !== 1 ? "s" : ""} remaining · invite members to fill them.
-          </p>
-        )}
-        {spotsLeft === 0 && (
-          <p className="text-xs text-[var(--yellow)] mt-3">
-            Your team is at the 10-member limit.
-          </p>
-        )}
-      </section>
+        {/* Empty state — health data */}
+        <Card className="border-dashed border-(--dp-border) bg-transparent rounded-xl">
+          <CardContent className="flex flex-col items-center justify-center py-14 gap-3 text-center">
+            <div className="size-12 rounded-xl bg-(--bg-secondary) border border-(--dp-border) flex items-center justify-center">
+              <Activity className="size-5 text-(--text-muted)" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">No health data yet</h3>
+              <p className="text-sm text-(--text-secondary) max-w-xs mt-1 mx-auto">
+                Connect a GitHub integration to start collecting developer metrics. Health scores
+                will appear here after 5–7 days of data.
+              </p>
+            </div>
+            <button className="text-xs font-medium text-(--dp-accent) hover:underline underline-offset-4 mt-1">
+              Set up integration →
+            </button>
+          </CardContent>
+        </Card>
 
-      {/* Empty state hint */}
-      <section className="mt-10 rounded-lg border border-dashed border-[var(--dp-border)] p-8 text-center">
-        <Activity className="size-8 text-[var(--text-muted)] mx-auto mb-3" />
-        <h3 className="font-semibold text-[var(--text-primary)] mb-1">No health data yet</h3>
-        <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">
-          Connect a GitHub integration to start collecting developer metrics. Health scores will
-          appear here after 5–7 days of data.
-        </p>
-      </section>
-    </div>
+      </div>
+    </>
   )
 }
 
 function StatCard({
   icon,
+  iconBg,
   label,
   value,
 }: {
   icon: React.ReactNode
+  iconBg: string
   label: string
   value: string
 }) {
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--dp-border)] rounded-lg p-4 flex items-center gap-4">
-      <div className="p-2 rounded-md bg-[var(--bg-secondary)]">{icon}</div>
-      <div>
-        <p className="text-xs text-[var(--text-muted)]">{label}</p>
-        <p className="font-semibold text-[var(--text-primary)]">{value}</p>
-      </div>
-    </div>
+    <Card className="border-(--dp-border) bg-(--bg-card) rounded-xl p-0">
+      <CardContent className="p-5 flex items-center gap-4">
+        <div className={`size-9 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}>
+          {icon}
+        </div>
+        <div>
+          <p className="text-xs text-(--text-muted)">{label}</p>
+          <p className="text-base font-semibold text-foreground mt-0.5">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function RoleBadge({ role }: { role: string }) {
+  if (role === "owner") {
+    return (
+      <Badge className="bg-(--accent-glow) text-(--dp-accent) border-transparent hover:bg-(--accent-glow)">
+        owner
+      </Badge>
+    )
+  }
+  if (role === "admin") {
+    return (
+      <Badge className="bg-(--green-glow) text-(--green) border-transparent hover:bg-(--green-glow)">
+        admin
+      </Badge>
+    )
+  }
+  return (
+    <Badge className="bg-white/5 text-(--text-secondary) border-transparent hover:bg-white/5">
+      member
+    </Badge>
   )
 }

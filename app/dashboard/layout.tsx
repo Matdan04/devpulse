@@ -1,7 +1,9 @@
+import { cookies } from "next/headers"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
-import { DashboardSidebar } from "@/components/dashboard/sidebar"
+import { AppSidebar } from "@/components/dashboard/sidebar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
 export default async function DashboardLayout({
   children,
@@ -11,15 +13,18 @@ export default async function DashboardLayout({
   const session = await auth()
   if (!session?.user?.id) redirect("/login")
 
-  // Load team membership for sidebar
   const membership = await db.teamMember.findFirst({
     where: { userId: session.user.id },
     include: { team: true },
   })
 
+  // Persist sidebar collapsed/expanded state via cookie
+  const cookieStore = await cookies()
+  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false"
+
   return (
-    <div className="flex min-h-screen bg-[var(--bg-primary)]">
-      <DashboardSidebar
+    <SidebarProvider defaultOpen={defaultOpen}>
+      <AppSidebar
         user={{
           name: session.user.name ?? "Unknown",
           email: session.user.email ?? "",
@@ -28,7 +33,7 @@ export default async function DashboardLayout({
         team={membership?.team ?? null}
         role={membership?.role ?? "member"}
       />
-      <main className="flex-1 overflow-auto">{children}</main>
-    </div>
+      <SidebarInset>{children}</SidebarInset>
+    </SidebarProvider>
   )
 }

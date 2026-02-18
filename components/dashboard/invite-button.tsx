@@ -60,12 +60,12 @@ export function InviteButton() {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[var(--bg-card)] border border-[var(--dp-border)] rounded-xl p-6 w-full max-w-md shadow-2xl">
+          <div className="bg-(--bg-card) border border-(--dp-border) rounded-xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-[var(--text-primary)]">Invite a team member</h2>
+              <h2 className="text-lg font-bold text-foreground">Invite a team member</h2>
               <button
                 onClick={reset}
-                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                className="text-(--text-muted) hover:text-foreground transition-colors"
               >
                 <X className="size-5" />
               </button>
@@ -100,19 +100,19 @@ export function InviteButton() {
               </form>
             ) : (
               <div className="flex flex-col gap-4">
-                <p className="text-sm text-[var(--text-secondary)]">
+                <p className="text-sm text-(--text-secondary)">
                   {email
                     ? `An invitation email has been sent to ${email}. Share the link below as a backup.`
                     : "Share this link with your teammate. It expires in 7 days."}
                 </p>
 
-                <div className="flex items-center gap-2 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--dp-border)]">
-                  <p className="flex-1 text-xs text-[var(--text-secondary)] truncate font-mono">
+                <div className="flex items-center gap-2 p-3 bg-(--bg-secondary) rounded-lg border border-(--dp-border)">
+                  <p className="flex-1 text-xs text-(--text-secondary) truncate font-mono">
                     {inviteUrl}
                   </p>
                   <Button size="icon-sm" variant="ghost" onClick={copyLink}>
                     {copied ? (
-                      <Check className="size-3.5 text-[var(--green)]" />
+                      <Check className="size-3.5 text-(--green)" />
                     ) : (
                       <Copy className="size-3.5" />
                     )}

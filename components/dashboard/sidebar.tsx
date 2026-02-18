@@ -12,25 +12,28 @@ import {
   Settings,
   LogOut,
   Activity,
+  ChevronsUpDown,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-
-interface Team {
-  id: string
-  name: string
-  slug: string
-}
-
-interface SidebarProps {
-  user: {
-    name: string
-    email: string
-    image: string | null
-  }
-  team: Team | null
-  role: string
-}
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -41,76 +44,119 @@ const navItems = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
 
-export function DashboardSidebar({ user, team, role }: SidebarProps) {
+interface AppSidebarProps {
+  user: { name: string; email: string; image: string | null }
+  team: { id: string; name: string; slug: string } | null
+  role: string
+}
+
+export function AppSidebar({ user, team, role }: AppSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="flex h-screen w-60 flex-col border-r border-[var(--dp-border)] bg-[var(--bg-secondary)] sticky top-0">
+    <Sidebar collapsible="icon">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--dp-border)]">
-        <div className="flex size-7 items-center justify-center rounded-md bg-[var(--green)] text-black">
-          <Activity className="size-4" />
-        </div>
-        <span className="font-bold text-[var(--text-primary)]">DevPulse</span>
-      </div>
-
-      {/* Team name */}
-      {team && (
-        <div className="px-5 py-3 border-b border-[var(--dp-border)]">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Team</p>
-          <p className="text-sm font-medium text-[var(--text-primary)] truncate">{team.name}</p>
-          <p className="text-xs text-[var(--text-muted)] capitalize">{role}</p>
-        </div>
-      )}
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="hover:bg-transparent active:bg-transparent"
+            >
+              <Link href="/dashboard">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-(--green) text-black shrink-0">
+                  <Activity className="size-4" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-bold text-foreground">DevPulse</span>
+                  {team && (
+                    <span className="text-xs text-(--text-muted) truncate capitalize">
+                      {role}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-                isActive
-                  ? "bg-[var(--green-glow)] text-[var(--green)] font-medium"
-                  : "text-[var(--text-secondary)] hover:bg-white/5 hover:text-[var(--text-primary)]"
-              )}
-            >
-              <Icon className="size-4 shrink-0" />
-              {label}
-            </Link>
-          )
-        })}
-      </nav>
-
-      {/* User + logout */}
-      <div className="px-3 py-4 border-t border-[var(--dp-border)] space-y-2">
-        <div className="flex items-center gap-3 px-3 py-2">
-          {user.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.image} alt={user.name} className="size-7 rounded-full" />
-          ) : (
-            <div className="size-7 rounded-full bg-[var(--bg-card)] flex items-center justify-center text-xs font-bold text-[var(--text-primary)]">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
+      <SidebarContent>
+        <SidebarGroup>
+          {team && (
+            <SidebarGroupLabel className="text-(--text-muted) truncate">
+              {team.name}
+            </SidebarGroupLabel>
           )}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[var(--text-primary)] truncate">{user.name}</p>
-            <p className="text-xs text-[var(--text-muted)] truncate">{user.email}</p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-3 text-[var(--text-secondary)] hover:text-[var(--red)]"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-        >
-          <LogOut className="size-4" />
-          Sign out
-        </Button>
-      </div>
-    </aside>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map(({ href, label, icon: Icon }) => (
+                <SidebarMenuItem key={href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === href}
+                    tooltip={label}
+                  >
+                    <Link href={href}>
+                      <Icon />
+                      <span>{label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      {/* User footer */}
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar size="sm" className="shrink-0">
+                    {user.image && <AvatarImage src={user.image} alt={user.name} />}
+                    <AvatarFallback className="bg-(--bg-card) text-foreground text-xs font-bold">
+                      {user.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col flex-1 min-w-0 text-left leading-tight">
+                    <span className="text-sm font-medium text-foreground truncate">
+                      {user.name}
+                    </span>
+                    <span className="text-xs text-(--text-muted) truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4 shrink-0 text-(--text-muted)" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                align="end"
+                className="w-56 bg-(--bg-card) border-(--dp-border)"
+              >
+                <DropdownMenuItem
+                  className="text-(--red) focus:text-(--red) focus:bg-(--red-glow) cursor-pointer gap-2"
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                >
+                  <LogOut className="size-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
   )
 }

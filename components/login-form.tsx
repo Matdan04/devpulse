@@ -65,7 +65,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         </div>
 
         {justRegistered && !error && (
-          <p className="text-sm text-center text-[var(--green)]">
+          <p className="text-sm text-center text-(--green)">
             Account created! Log in below.
           </p>
         )}
