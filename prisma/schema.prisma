@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth Models (required by Auth.js / next-auth) ───────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // hashed — only set for credentials auth
+  timezone      String    @default("UTC")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  memberships TeamMember[]
+  metrics     DeveloperMetrics[]
+  scores      BurnoutScore[]
+  alertPrefs  AlertPreference[]
+  invitations Invitation[]       @relation("InvitedBy")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  access_token      String?
+  refresh_token     String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Team & Membership ────────────────────────────────────────────────────────
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members      TeamMember[]
+  integrations Integration[]
+  alertRules   AlertRule[]
+  invitations  Invitation[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  role      String   @default("member") // "owner" | "admin" | "member"
+  userId    String
+  teamId    String
+  isVisible Boolean  @default(true) // opt-in visibility to team
+  joinedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId])
+}
+
+// ─── Invitations ──────────────────────────────────────────────────────────────
+
+model Invitation {
+  id          String    @id @default(cuid())
+  teamId      String
+  email       String?   // pre-fill recipient email (optional)
+  token       String    @unique @default(cuid())
+  role        String    @default("member")
+  invitedById String
+  usedAt      DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  team      Team @relation(fields: [teamId], references: [id])
+  invitedBy User @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  @@index([token])
+}
+
+// ─── Integrations ─────────────────────────────────────────────────────────────
+
+model Integration {
+  id           String   @id @default(cuid())
+  teamId       String
+  provider     String   // "github" | "gitlab" | "bitbucket" | "jira" | "linear"
+  accessToken  String   // encrypted
+  refreshToken String?  // encrypted
+  orgName      String?
+  repoNames    String[] // tracked repos
+  webhookId    String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id])
+}
+
+// ─── Developer Metrics ────────────────────────────────────────────────────────
+
+model DeveloperMetrics {
+  id     String   @id @default(cuid())
+  userId String
+  teamId String
+  date   DateTime @db.Date // one record per day
+
+  // Commit signals
+  totalCommits        Int @default(0)
+  lateNightCommits    Int @default(0) // after 10pm local
+  earlyMorningCommits Int @default(0) // before 6am local
+  weekendCommits      Int @default(0)
+
+  // PR signals
+  prsOpened       Int    @default(0)
+  prsReviewed     Int    @default(0)
+  prsMerged       Int    @default(0)
+  avgPrReviewTime Float? // hours
+
+  // Issue signals
+  issuesAssigned Int @default(0)
+  issuesClosed   Int @default(0)
+  issuesOverdue  Int @default(0)
+
+  // Work pattern signals
+  activeDaysThisWeek Int    @default(0)
+  firstActivityHour  Int?   // 0-23
+  lastActivityHour   Int?   // 0-23
+  workingHoursSpread Float? // std deviation of activity hours
+
+  sprintId  String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, teamId, date])
+  @@index([userId, date])
+  @@index([teamId, date])
+}
+
+// ─── Burnout Scores ───────────────────────────────────────────────────────────
+
+model BurnoutScore {
+  id     String   @id @default(cuid())
+  userId String
+  teamId String
+  date   DateTime @db.Date
+
+  overallScore Float  // 0-100 (0 = healthy, 100 = critical)
+  riskLevel    String // "low" | "moderate" | "elevated" | "high" | "critical"
+
+  // Signal breakdown (0-100 each)
+  afterHoursScore Float
+  weekendScore    Float
+  reviewDropScore Float
+  overloadScore   Float
+  velocityScore   Float
+  patternScore    Float
+
+  weekOverWeekDelta Float? // change from last week
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, teamId, date])
+  @@index([userId, date])
+  @@index([teamId, date])
+}
+
+// ─── Alerts ───────────────────────────────────────────────────────────────────
+
+model AlertRule {
+  id            String   @id @default(cuid())
+  teamId        String
+  name          String
+  riskLevel     String   // trigger when score reaches this level
+  channel       String   // "slack" | "email"
+  targetWebhook String?  // Slack webhook URL
+  targetEmail   String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id])
+}
+
+model AlertPreference {
+  id               String  @id @default(cuid())
+  userId           String
+  receiveOwnAlerts Boolean @default(true)
+  shareWithTeam    Boolean @default(false) // opt-in to share score
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─── Webhook Event Log ────────────────────────────────────────────────────────
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String
+  eventType   String
+  payload     Json
+  processed   Boolean   @default(false)
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([processed, createdAt])
+}

@@ -1,89 +1,153 @@
 # 🔥 Developer Health & Burnout Radar — Full Build Blueprint
 
-> **Working Name:** DevPulse (can be swapped once you pick)
-> **Stack:** Next.js 14+ (App Router), TypeScript, PostgreSQL, Prisma, Tailwind CSS, Recharts
+> **Name:** DevPulse
+> **Stack:** Next.js 16 (App Router), React 19, TypeScript, PostgreSQL, Prisma 5, Tailwind CSS v4, Recharts
+> **Auth:** Auth.js v5 beta (next-auth@5.0.0-beta.30) — GitHub OAuth + email/password credentials
+> **Package Manager:** pnpm
 > **Target:** SaaS for dev teams (5-200 engineers)
+> **Team limit (MVP):** 10 members per team
 
 ---
 
 ## 📁 Project Structure
 
+> Legend: ✅ Built | 🔜 Next | ⬜ Pending
+
 ```
 devpulse/
 ├── prisma/
-│   └── schema.prisma
-├── src/
-│   ├── app/
-│   │   ├── (auth)/
-│   │   │   ├── login/page.tsx
-│   │   │   └── signup/page.tsx
-│   │   ├── (dashboard)/
-│   │   │   ├── layout.tsx
-│   │   │   ├── page.tsx                    # Team overview
-│   │   │   ├── member/[id]/page.tsx        # Individual view
-│   │   │   ├── alerts/page.tsx             # Alert config
-│   │   │   ├── settings/page.tsx           # General settings
-│   │   │   ├── integrations/page.tsx       # Connect providers
-│   │   │   └── reports/page.tsx            # Weekly/monthly reports
-│   │   ├── api/
-│   │   │   ├── auth/[...nextauth]/route.ts
-│   │   │   ├── webhooks/
-│   │   │   │   ├── github/route.ts
-│   │   │   │   ├── gitlab/route.ts
-│   │   │   │   └── bitbucket/route.ts
-│   │   │   ├── cron/
-│   │   │   │   ├── ingest/route.ts
-│   │   │   │   └── score/route.ts
-│   │   │   ├── teams/route.ts
-│   │   │   ├── members/route.ts
-│   │   │   └── alerts/route.ts
-│   │   ├── layout.tsx
-│   │   └── page.tsx                        # Landing page
-│   ├── components/
-│   │   ├── ui/                             # Shared UI (buttons, cards, etc.)
-│   │   ├── charts/                         # Chart components
-│   │   ├── dashboard/                      # Dashboard-specific components
-│   │   └── layout/                         # Nav, sidebar, etc.
-│   ├── lib/
-│   │   ├── db.ts                           # Prisma client
-│   │   ├── auth.ts                         # NextAuth config
-│   │   ├── scoring/
-│   │   │   ├── engine.ts                   # Burnout score calculator
-│   │   │   ├── signals.ts                  # Signal extractors
-│   │   │   └── thresholds.ts               # Risk level definitions
-│   │   ├── integrations/
-│   │   │   ├── github.ts                   # GitHub API client
-│   │   │   ├── gitlab.ts                   # GitLab API client
-│   │   │   ├── bitbucket.ts                # Bitbucket API client
-│   │   │   ├── jira.ts                     # Jira API client
-│   │   │   └── linear.ts                   # Linear API client
-│   │   ├── ingestion/
-│   │   │   ├── commits.ts                  # Commit data processor
-│   │   │   ├── pull-requests.ts            # PR data processor
-│   │   │   ├── issues.ts                   # Issue data processor
-│   │   │   └── sprints.ts                  # Sprint data processor
-│   │   └── utils/
-│   │       ├── timezone.ts                 # Timezone-aware time helpers
-│   │       ├── privacy.ts                  # Data anonymization helpers
-│   │       └── notifications.ts            # Slack/email notification sender
-│   ├── hooks/                              # Custom React hooks
-│   └── types/                              # TypeScript types
-├── .env.local
+│   ├── schema.prisma                       ✅ Full schema (13 models)
+│   └── migrations/
+│       └── 20260218000000_init/            ✅ Initial migration
+│           └── migration.sql
+├── app/
+│   ├── api/
+│   │   ├── auth/[...nextauth]/route.ts     ✅ Auth.js route handler
+│   │   ├── signup/route.ts                 ✅ POST — create account
+│   │   ├── invitations/route.ts            ✅ POST — create invite / GET — validate token
+│   │   ├── webhooks/
+│   │   │   ├── github/route.ts             ⬜
+│   │   │   ├── gitlab/route.ts             ⬜
+│   │   │   └── bitbucket/route.ts          ⬜
+│   │   ├── cron/
+│   │   │   ├── ingest/route.ts             ⬜
+│   │   │   └── score/route.ts              ⬜
+│   │   ├── teams/route.ts                  ⬜
+│   │   ├── members/route.ts                ⬜
+│   │   └── alerts/route.ts                 ⬜
+│   ├── dashboard/
+│   │   ├── layout.tsx                      ✅ Dashboard shell with sidebar
+│   │   ├── page.tsx                        ✅ Team overview (placeholder)
+│   │   ├── member/[id]/page.tsx            ⬜ Individual view
+│   │   ├── alerts/page.tsx                 ⬜ Alert config
+│   │   ├── settings/page.tsx               ⬜ General settings
+│   │   ├── integrations/page.tsx           ⬜ Connect providers
+│   │   └── reports/page.tsx                ⬜ Weekly/monthly reports
+│   ├── login/page.tsx                      ✅ Login page
+│   ├── signup/page.tsx                     ✅ Signup page (lead + invite flow)
+│   ├── layout.tsx                          ✅ Root layout + SessionProvider
+│   ├── page.tsx                            ✅ Landing page
+│   └── globals.css                         ✅ Tailwind v4 + custom theme
+├── components/
+│   ├── ui/                                 ✅ button, input, card, field, badge…
+│   ├── layout/                             ✅ Navbar, footer
+│   ├── sections/                           ✅ Landing page sections
+│   ├── dashboard/
+│   │   ├── sidebar.tsx                     ✅ Sidebar nav (all routes stubbed)
+│   │   └── invite-button.tsx               ✅ Invite member modal
+│   ├── charts/                             ⬜ Recharts components
+│   ├── login-form.tsx                      ✅ Login form with NextAuth signIn
+│   ├── signup-form.tsx                     ✅ Signup form (lead + invite modes)
+│   └── session-provider.tsx                ✅ Auth.js SessionProvider wrapper
+├── lib/
+│   ├── db.ts                               ✅ Prisma singleton client
+│   ├── utils.ts                            ✅ cn() helper
+│   ├── scoring/
+│   │   ├── engine.ts                       ⬜ Burnout score calculator
+│   │   ├── signals.ts                      ⬜ Signal extractors
+│   │   └── thresholds.ts                   ⬜ Risk level definitions
+│   ├── integrations/
+│   │   ├── github.ts                       ⬜ GitHub API client
+│   │   ├── gitlab.ts                       ⬜
+│   │   ├── bitbucket.ts                    ⬜
+│   │   ├── jira.ts                         ⬜
+│   │   └── linear.ts                       ⬜
+│   ├── ingestion/
+│   │   ├── commits.ts                      ⬜
+│   │   ├── pull-requests.ts                ⬜
+│   │   ├── issues.ts                       ⬜
+│   │   └── sprints.ts                      ⬜
+│   └── utils/
+│       ├── timezone.ts                     ⬜
+│       ├── privacy.ts                      ⬜
+│       └── notifications.ts                ⬜
+├── types/
+│   └── next-auth.d.ts                      ✅ Session type augmentation
+├── hooks/                                  ⬜ Custom React hooks
+├── auth.ts                                 ✅ Auth.js config (root-level)
+├── proxy.ts                                ✅ Route protection (Next.js 16 convention)
+├── .env                                    ✅ Environment variables
 ├── next.config.ts
-├── tailwind.config.ts
 ├── package.json
 └── tsconfig.json
 ```
 
 ---
 
-## 🧩 MODULE 1: Project Setup & Auth
+## 🧩 MODULE 1: Project Setup & Auth ✅ COMPLETE
 
-### What to build
-- Next.js 14+ project with App Router, TypeScript, Tailwind
-- NextAuth.js with GitHub OAuth (primary), GitLab OAuth, email/password
-- PostgreSQL database with Prisma ORM
-- Basic layout: sidebar nav, top bar, responsive
+### What was built
+- Next.js 16 + React 19, App Router, TypeScript, Tailwind v4
+- Auth.js v5 beta — GitHub OAuth + email/password credentials (JWT sessions)
+- PostgreSQL + Prisma 5 — schema pushed + migration file created
+- Dashboard shell: sidebar nav, team overview, invite modal
+- Invitation system: generates shareable links + sends emails via Resend
+- Route protection via `proxy.ts` (Next.js 16 renamed `middleware.ts` → `proxy.ts`)
+
+### Key implementation decisions
+- **`auth.ts` at root** (not `src/lib/auth.ts`) — Auth.js v5 convention
+- **JWT sessions** instead of database sessions — required for credentials provider compatibility
+- **`proxy.ts`** instead of `middleware.ts` — Next.js 16 deprecation
+- **`pnpm`** as package manager — required for this project
+- **Prisma 5** (not 7) — Prisma 7 has Node 20 ESM incompatibility
+- **Zod v4** — same `safeParse` / `z.object` API as v3
+- **`prisma db push`** used for initial setup; migration file created manually and baselined with `prisma migrate resolve`
+- **10-member team cap** enforced at API level in `/api/signup` and `/api/invitations`
+
+### Auth flow
+```
+/signup (no invite) → team lead creates team → becomes "owner"
+/signup?invite=TOKEN → member joins via invite token → becomes "member"
+/login → credentials or GitHub OAuth → /dashboard
+/dashboard/* → protected by proxy.ts, redirects to /login if not authenticated
+```
+
+### Key files created
+1. `prisma/schema.prisma` — 13 models including Invitation model
+2. `prisma/migrations/20260218000000_init/migration.sql`
+3. `lib/db.ts` — Prisma singleton
+4. `auth.ts` — Auth.js config (GitHub + Credentials providers)
+5. `app/api/auth/[...nextauth]/route.ts` — route handler
+6. `app/api/signup/route.ts` — account creation (lead + invite paths)
+7. `app/api/invitations/route.ts` — create invite + validate token + send Resend email
+8. `app/login/page.tsx` + `components/login-form.tsx`
+9. `app/signup/page.tsx` + `components/signup-form.tsx`
+10. `app/dashboard/layout.tsx` + `components/dashboard/sidebar.tsx`
+11. `app/dashboard/page.tsx` — team overview with members table
+12. `components/dashboard/invite-button.tsx` — modal to generate/send invite
+13. `proxy.ts` — route protection
+14. `types/next-auth.d.ts` — session type augmentation
+
+### Commands to run after cloning
+```bash
+pnpm install
+cp .env.example .env   # fill in AUTH_SECRET, GITHUB_CLIENT_ID/SECRET
+docker compose up -d   # or start local Postgres
+pnpm prisma migrate deploy
+pnpm dev
+```
+
+### What to build (original plan)
 
 ### Database Schema (Prisma)
 
@@ -941,15 +1005,15 @@ Step 5: Baseline Ready
 
 ## 🛠️ Build Order (Recommended)
 
-| Phase | Modules | Estimated Time |
-|-------|---------|----------------|
-| **Phase 1: Foundation** | Module 1 (Setup & Auth) + Module 2 (Integrations - GitHub only) | 1-2 weeks |
-| **Phase 2: Core Engine** | Module 3 (Ingestion) + Module 4 (Score Engine) | 2 weeks |
-| **Phase 3: Dashboard** | Module 5 (Dashboard UI) | 2 weeks |
-| **Phase 4: Alerts** | Module 6 (Alerts & Notifications) | 1 week |
-| **Phase 5: Privacy** | Module 7 (Privacy Layer) | 1 week |
-| **Phase 6: Polish** | Module 8 (Reports) + Module 9 (Landing & Onboarding) | 2 weeks |
-| **Phase 7: Expand** | GitLab + Bitbucket + Jira/Linear integrations | 2 weeks |
+| Phase | Modules | Status |
+|-------|---------|--------|
+| **Phase 1: Foundation** | Module 1 (Setup & Auth) + Module 2 (Integrations - GitHub only) | ✅ M1 Done · 🔜 M2 Next |
+| **Phase 2: Core Engine** | Module 3 (Ingestion) + Module 4 (Score Engine) | ⬜ Pending |
+| **Phase 3: Dashboard** | Module 5 (Dashboard UI) | ⬜ Pending |
+| **Phase 4: Alerts** | Module 6 (Alerts & Notifications) | ⬜ Pending |
+| **Phase 5: Privacy** | Module 7 (Privacy Layer) | ⬜ Pending |
+| **Phase 6: Polish** | Module 8 (Reports) + Module 9 (Landing & Onboarding) | ⬜ Pending |
+| **Phase 7: Expand** | GitLab + Bitbucket + Jira/Linear integrations | ⬜ Pending |
 
 **Total MVP: ~10-12 weeks solo**
 
@@ -958,26 +1022,33 @@ Step 5: Baseline Ready
 ## 🔑 Environment Variables
 
 ```env
-# Database
-DATABASE_URL="postgresql://user:pass@localhost:5432/devpulse"
+# ── Database ──────────────────────────────────────────────────────────────────
+# Local dev
+DATABASE_URL="postgresql://devpulse:devpulse123@localhost:5432/devpulse"
+# Production (Neon)
+# DATABASE_URL="postgresql://user:pass@ep-xxx.neon.tech/devpulse?sslmode=require"
 
-# Auth
-NEXTAUTH_SECRET="your-secret-key"
+# ── Auth.js v5 ────────────────────────────────────────────────────────────────
+# Generate: openssl rand -base64 32
+AUTH_SECRET="your-random-32-char-secret"
 NEXTAUTH_URL="http://localhost:3000"
 
-# GitHub OAuth App
+# ── GitHub OAuth App (Module 1) ───────────────────────────────────────────────
+# Callback URL: http://localhost:3000/api/auth/callback/github
 GITHUB_CLIENT_ID=""
 GITHUB_CLIENT_SECRET=""
 
-# GitLab OAuth App (Phase 7)
+# ── Resend (email — Module 1 invitations) ─────────────────────────────────────
+RESEND_API_KEY=""
+
+# ── GitLab OAuth App (Phase 7) ────────────────────────────────────────────────
 GITLAB_CLIENT_ID=""
 GITLAB_CLIENT_SECRET=""
 
-# Notifications
+# ── Notifications (Module 6) ──────────────────────────────────────────────────
 SLACK_WEBHOOK_URL=""
-RESEND_API_KEY=""
 
-# Encryption
+# ── Encryption (Module 7) ────────────────────────────────────────────────────
 ENCRYPTION_KEY="32-byte-hex-key-for-token-encryption"
 ```
 
@@ -985,33 +1056,43 @@ ENCRYPTION_KEY="32-byte-hex-key-for-token-encryption"
 
 ## 📦 Key Dependencies
 
+> Actual installed versions as of Module 1
+
 ```json
 {
   "dependencies": {
-    "next": "^14.0.0",
-    "react": "^18.0.0",
-    "typescript": "^5.0.0",
-    "@prisma/client": "^5.0.0",
-    "next-auth": "^4.24.0",
-    "@auth/prisma-adapter": "^1.0.0",
-    "recharts": "^2.10.0",
-    "lucide-react": "^0.300.0",
-    "clsx": "^2.0.0",
-    "tailwind-merge": "^2.0.0",
-    "date-fns": "^3.0.0",
-    "date-fns-tz": "^2.0.0",
-    "zod": "^3.22.0",
-    "resend": "^2.0.0",
-    "@slack/webhook": "^7.0.0"
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "@prisma/client": "^5.22.0",
+    "next-auth": "5.0.0-beta.30",
+    "@auth/prisma-adapter": "^2.11.1",
+    "bcryptjs": "^3.0.3",
+    "zod": "^4.3.6",
+    "resend": "^6.9.2",
+    "lucide-react": "^0.568.0",
+    "radix-ui": "^1.4.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.4.1"
   },
   "devDependencies": {
-    "prisma": "^5.0.0",
-    "@types/node": "^20.0.0",
-    "@types/react": "^18.0.0",
-    "tailwindcss": "^3.4.0"
+    "prisma": "^5.22.0",
+    "typescript": "^5",
+    "tailwindcss": "^4",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma"]
   }
 }
 ```
+
+> **To add in future modules:**
+> - `recharts` — charts (Module 5)
+> - `date-fns` + `date-fns-tz` — timezone-aware timestamps (Module 3)
+> - `@slack/webhook` — Slack alerts (Module 6)
 
 ---
 
@@ -1023,6 +1104,18 @@ ENCRYPTION_KEY="32-byte-hex-key-for-token-encryption"
 4. **GitHub webhook testing** — use [smee.io](https://smee.io) to proxy webhooks locally
 5. **Privacy first** — implement the privacy layer BEFORE inviting any real users
 6. **Seed data** — create a seed script with realistic mock data so you can build the UI without waiting for real integrations
+
+## ⚠️ Project-Specific Gotchas
+
+| Issue | Solution |
+|-------|----------|
+| `prisma migrate dev` won't run in Claude Code | Run it manually in your own terminal — it needs an interactive shell |
+| Next.js 16 renamed `middleware.ts` | Use `proxy.ts` instead (same API, new filename) |
+| `next-auth@5` not published as `next-auth@5` | Install as `next-auth@beta` — resolves to `5.0.0-beta.30` |
+| Prisma 7 fails on Node 20 | Stick to Prisma 5 (`^5.22.0`) until Node compatibility is fixed |
+| pnpm requires build approval for Prisma | Add `"pnpm": { "onlyBuiltDependencies": [...] }` to `package.json` |
+| `useSearchParams` in client components | Must be wrapped in `<Suspense>` in Next.js App Router pages |
+| Zod v4 imported same as v3 | `import { z } from "zod"` — API unchanged for `z.object`, `safeParse`, etc. |
 
 ---
 

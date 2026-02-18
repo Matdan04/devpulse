@@ -2,7 +2,31 @@
   "permissions": {
     "allow": [
       "Bash(pnpm dlx shadcn@latest init:*)",
-      "Bash(pnpm dlx:*)"
+      "Bash(pnpm dlx:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(powershell -Command \"New-Item -ItemType Directory -Force -Path ''app/api/auth/[...nextauth]'',''types'',''app/api/signup'',''app/api/invitations'',''app/signup'',''app/dashboard'' | Out-Null; Write-Host ''Dirs created''\")",
+      "Bash(powershell -Command \"New-Item -ItemType Directory -Force -Path ''components/dashboard'' | Out-Null; Write-Host ''done''\")",
+      "Bash(pnpm prisma generate:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm prisma db push:*)",
+      "Bash(node -e:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(echo:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm build:*)",
+      "Bash(powershell -Command \"Remove-Item middleware.ts; Write-Host ''removed''\")",
+      "Bash(powershell -Command \"Get-ChildItem -Name ''*.ts'' -Depth 0\")",
+      "Bash(pnpm prisma migrate dev:*)",
+      "Bash(powershell -Command \"New-Item -ItemType Directory -Force -Path ''prisma/migrations/20260218000000_init'' | Out-Null; Write-Host ''done''\")",
+      "Bash(pnpm prisma migrate diff:*)",
+      "Bash(powershell -Command \"$input | Out-File -FilePath ''prisma/migrations/20260218000000_init/migration.sql'' -Encoding utf8\")",
+      "Bash(powershell -Command:*)",
+      "Bash(pnpm prisma migrate resolve:*)",
+      "Bash(pnpm prisma migrate status:*)"
     ]
   }
 }
